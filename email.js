@@ -1,20 +1,14 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-function shortId(id){
+function shortId(id) {
   return "AGW-" + String(id).slice(-5);
 }
 
-function sendMail(to, subject, html){
-  return transporter.sendMail({
-    from: process.env.EMAIL_USER,
+async function sendMail(to, subject, html) {
+  return await resend.emails.send({
+    from: "Apex Grid Works <orders@apexgridworks.com>",
     to,
     subject,
     html
@@ -22,4 +16,3 @@ function sendMail(to, subject, html){
 }
 
 module.exports = { sendMail, shortId };
-
