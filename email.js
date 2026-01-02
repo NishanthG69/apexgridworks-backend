@@ -14,7 +14,7 @@ function shortId(id){
 
 function sendMail(to, subject, html){
   return transporter.sendMail({
-    from: `"Apex Grid Works" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER,
     to,
     subject,
     html
@@ -22,3 +22,4 @@ function sendMail(to, subject, html){
 }
 
 module.exports = { sendMail, shortId };
+
