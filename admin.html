@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Apex Grid Works — Admin</title>
+
+<style>
+:root{
+  --bg:#0b0b0b;
+  --panel:#111;
+  --ink:#eaeaea;
+  --muted:#9a9a9a;
+  --border:#2a2a2a;
+  --accent:#e10600;
+}
+
+body{
+  font-family: Inter, system-ui, Arial;
+  background:var(--bg);
+  color:var(--ink);
+  padding:30px;
+}
+
+h1{
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border-bottom:3px solid var(--accent);
+  padding-bottom:10px;
+  margin-bottom:24px;
+}
+
+.order{
+  background:var(--panel);
+  border:1.5px solid var(--border);
+  padding:18px;
+  margin-bottom:18px;
+  position:relative;
+}
+
+.order::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border:1px solid #1f1f1f;
+  pointer-events:none;
+}
+
+.order-id{
+  font-size:12px;
+  letter-spacing:2px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.product{
+  font-size:15px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+}
+
+.meta{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.status{
+  margin-top:10px;
+  font-weight:800;
+  letter-spacing:1.5px;
+}
+
+.actions{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+}
+
+.actions button{
+  background:#0b0b0b;
+  border:1.5px solid var(--border);
+  color:var(--ink);
+  padding:8px 12px;
+  font-size:11px;
+  letter-spacing:1.5px;
+  font-weight:800;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.actions button:hover{
+  border-color:var(--accent);
+  color:white;
+  transform:translateY(-1px);
+}
+
+/* STATUS-SPECIFIC COLORS */
+.actions .prod{
+  border-color:#00c8ff;
+  color:#00c8ff;
+}
+
+.actions .prod:hover{
+  background:#001c24;
+}
+
+.actions .done{
+  border-color:#7CFF7C;
+  color:#7CFF7C;
+}
+
+.actions .done:hover{
+  background:#102010;
+}
+
+.actions .delete{
+  border-color:#ff4d4d;
+  color:#ff4d4d;
+}
+
+.actions .delete:hover{
+  background:#2a0000;
+}
+
+.badges{
+  margin-top:6px;
+  display:flex;
+  gap:8px;
+}
+
+.badge{
+  border:1.5px solid var(--border);
+  padding:4px 6px;
+  font-size:10px;
+  letter-spacing:1.5px;
+  font-weight:800;
+}
+
+.badge.premium{
+  border-color:#00c8ff;
+  color:#00c8ff;
+}
+
+.badge.priority{
+  border-color:#ffcc00;
+  color:#ffcc00;
+}
+
+.status.RECEIVED{ color:#ffcc00; }
+.status.IN_PRODUCTION{ color:#00c8ff; }
+.status.DELIVERED{ color:#7CFF7C; }
+</style>
+
+</head>
+<body>
+
+<h1>ORDERS</h1>
+<div id="orders"></div>
+
+<script>
+const username = prompt("Admin username");
+const password = prompt("Admin password");
+
+function loadOrders(){
+  fetch("/api/orders", {
+    headers: {
+      "Authorization": "Basic " + btoa(username + ":" + password)
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Auth failed");
+    return res.json();
+  })
+  .then(renderOrders)
+  .catch(() => {
+    document.body.innerHTML = "<h2>ACCESS DENIED</h2>";
+  });
+}
+
+function renderOrders(data){
+  const container = document.getElementById("orders");
+  container.innerHTML = "";
+
+  data.reverse().forEach(o => {
+    const div = document.createElement("div");
+    div.className = "order";
+
+    div.innerHTML = `
+      <div class="order-id">ORDER #AGW-${String(o.id).slice(-5)}</div>
+
+      <div class="product">
+        ${o.product}${o.color ? " — " + o.team : ""}
+      </div>
+      ${o.baseColor ? `<div class="meta">Base: ${o.baseColor}</div>` : ""}
+      <div class="badges">
+        ${o.quality === "PREMIUM" ? `<div class="badge premium">PREMIUM QUALITY</div>` : ""}
+        ${o.priority ? `<div class="badge priority">QUICK DELIVERY</div>` : ""}
+      </div>
+
+      <div class="meta">
+        ${o.name} | ${o.class} | ${o.board}
+      </div>
+
+      <div class="meta">
+        Phone: ${o.phone}
+      </div>
+
+      <div class="meta">
+        Email: ${o.email}
+      </div>
+
+      <div class="meta">
+        Price: ₹${o.basePrice}
+        ${o.quality === "PREMIUM" ? " + ₹50 (Quality)" : ""}
+        ${o.priority ? " + ₹50 (Quick)" : ""}
+      </div>
+
+      <div class="meta">
+        <strong>Total: ₹${o.total}</strong>
+      </div>
+
+      <div class="status ${o.status}">
+        STATUS: ${o.status}
+      </div>
+
+      <div class="actions">
+        ${o.status === "RECEIVED"
+          ? `
+            <button class="prod" onclick="updateStatus(${o.id}, 'IN_PRODUCTION')">
+              MARK IN PRODUCTION
+            </button>
+            <button class="done" onclick="updateStatus(${o.id}, 'DELIVERED')">
+              MARK DELIVERED
+            </button>
+          `
+          : ""}
+
+        ${o.status === "IN_PRODUCTION"
+          ? `
+            <button class="done" onclick="updateStatus(${o.id}, 'DELIVERED')">
+              MARK DELIVERED
+            </button>
+          `
+          : ""}
+
+        <button class="delete" onclick="deleteOrder(${o.id})">
+          DELETE
+        </button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function updateStatus(id, status){
+  fetch("/api/order/status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Basic " + btoa(username + ":" + password)
+    },
+    body: JSON.stringify({ id, status })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Failed");
+    return res.json();
+  })
+  .then(() => loadOrders())
+  .catch(() => alert("Failed to update status"));
+}
+
+function deleteOrder(id){
+  if (!confirm("Delete this order permanently?")) return;
+
+  fetch(`/api/order/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Basic " + btoa(username + ":" + password)
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Delete failed");
+    return res.json();
+  })
+  .then(() => loadOrders())
+  .catch(() => alert("Failed to delete order"));
+}
+
+
+// initial load
+loadOrders();
+</script>
+
+</body>
+</html>
