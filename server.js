@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 const fs = require("fs");
 const path = require("path");
 
-app.post("/api/order", (req, res) => {
+app.post("/api/order", async (req, res) => {
   const order = req.body;
   order.baseColor = order.baseColor || null;
 
@@ -53,7 +53,7 @@ app.post("/api/order", (req, res) => {
 
   console.log("New order received:", order);
   console.log("SENDING ORDER RECEIVED EMAIL TO:", order.email);
-  sendMail(
+  await sendMail(
     order.email,
     `Apex Grid Works — Order ${shortId(order.id)} received`,
     `
@@ -294,4 +294,5 @@ app.post("/api/order/status", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
