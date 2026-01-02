@@ -52,7 +52,7 @@ app.post("/api/order", (req, res) => {
   fs.writeFileSync(filePath, JSON.stringify(orders, null, 2));
 
   console.log("New order received:", order);
-
+  console.log("SENDING ORDER RECEIVED EMAIL TO:", order.email);
   sendMail(
     order.email,
     `Apex Grid Works — Order ${shortId(order.id)} received`,
@@ -294,3 +294,4 @@ app.post("/api/order/status", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
