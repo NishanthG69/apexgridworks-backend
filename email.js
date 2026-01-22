@@ -13,8 +13,9 @@ async function sendMail(to, subject, html){
   }
 
   return resend.emails.send({
-    from: "Apex Grid Works <support@apexgridworks.shop>", // 🔥 IMPORTANT
+    from: "Apex Grid Works <support@apexgridworks.shop>",
     to: [to],
+    reply_to: "nishanth.gannu07@gmail.com",
     subject,
     html
   });
