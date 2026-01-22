@@ -8,7 +8,7 @@ function shortId(id){
 
 async function sendMail(to, subject, html){
   return resend.emails.send({
-    from: "Apex Grid Works <onboarding@resend.dev>",
+    from: "Apex Grid Works <support@resend.dev>",
     to,
     subject,
     html
