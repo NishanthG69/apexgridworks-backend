@@ -7,9 +7,14 @@ function shortId(id){
 }
 
 async function sendMail(to, subject, html){
+  if (!to) {
+    console.error("❌ No recipient email provided");
+    return;
+  }
+
   return resend.emails.send({
-    from: "Apex Grid Works <support@resend.dev>",
-    to,
+    from: "Apex Grid Works <orders@apexgridworks.shop>", // 🔥 IMPORTANT
+    to: [to],
     subject,
     html
   });
