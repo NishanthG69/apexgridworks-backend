@@ -13,7 +13,7 @@ async function sendMail(to, subject, html){
   }
 
   return resend.emails.send({
-    from: "Apex Grid Works <orders@apexgridworks.shop>", // 🔥 IMPORTANT
+    from: "Apex Grid Works <support@apexgridworks.shop>", // 🔥 IMPORTANT
     to: [to],
     subject,
     html
