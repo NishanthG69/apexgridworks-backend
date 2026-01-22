@@ -1,23 +1,24 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 function shortId(id){
   return "AGW-" + String(id).slice(-5);
 }
 
-async function sendMail(to, subject, html){
-  try {
-    await resend.emails.send({
-      from: "Apex Grid Works <onboarding@resend.dev>",
-      to,
-      subject,
-      html
-    });
-    console.log("Email sent to:", to);
-  } catch (err) {
-    console.error("RESEND EMAIL FAILED:", err);
-  }
+function sendMail(to, subject, html){
+  return transporter.sendMail({
+    from: process.env.EMAIL_USER, // IMPORTANT: no custom name for now
+    to,
+    subject,
+    html
+  });
 }
 
 module.exports = { sendMail, shortId };
