@@ -36,15 +36,6 @@ app.post("/api/order", async (req, res) => {
   if (!order || !order.name || !order.phone || !order.product) {
     return res.status(400).json({ error: "Invalid order data" });
   }
-
-  const filePath = path.join(__dirname, "orders.json");
-
-  let orders = [];
-
-  if (fs.existsSync(filePath)) {
-    orders = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  }
-
   order.id = Date.now();
   order.basePrice = order.basePrice;
   order.quality = order.quality || "STANDARD";
@@ -195,6 +186,7 @@ app.get("/api/orders", async (req, res) => {
   }));
 
   res.json(orders);
+});
 
 
 app.delete("/api/order/:id", (req, res) => {
