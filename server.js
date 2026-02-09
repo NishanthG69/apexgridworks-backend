@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 const auth = new google.auth.JWT(
   process.env.GOOGLE_CLIENT_EMAIL,
   null,
-  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, "base64").toString("utf-8"),
   ["https://www.googleapis.com/auth/spreadsheets"]
 );
 
