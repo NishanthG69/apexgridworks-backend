@@ -7,18 +7,17 @@ function shortId(id){
 }
 
 async function sendMail(to, subject, html){
-  if (!to) {
-    console.error("❌ No recipient email provided");
-    return;
+  try {
+    await resend.emails.send({
+      from: "Apex Grid Works <onboarding@resend.dev>",
+      to,
+      subject,
+      html
+    });
+    console.log("Email sent to:", to);
+  } catch (err) {
+    console.error("RESEND EMAIL FAILED:", err);
   }
-
-  return resend.emails.send({
-    from: "Apex Grid Works <support@apexgridworks.shop>",
-    to: [to],
-    reply_to: "nishanth.gannu07@gmail.com",
-    subject,
-    html
-  });
 }
 
 module.exports = { sendMail, shortId };
