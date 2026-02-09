@@ -1,3 +1,5 @@
+const { google } = require("googleapis");
+
 require("dotenv").config();
 
 const { sendMail, shortId } = require("./email");
@@ -5,7 +7,7 @@ const { sendMail, shortId } = require("./email");
 const cors = require("cors");
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
@@ -15,10 +17,19 @@ app.get("/", (req, res) => {
   res.send("Apex Grid Works backend is running.");
 });
 
+const auth = new google.auth.JWT(
+  process.env.GOOGLE_CLIENT_EMAIL,
+  null,
+  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  ["https://www.googleapis.com/auth/spreadsheets"]
+);
+
+const sheets = google.sheets({ version: "v4", auth });
+
 const fs = require("fs");
 const path = require("path");
 
-app.post("/api/order", (req, res) => {
+app.post("/api/order", async (req, res) => {
   const order = req.body;
   order.baseColor = order.baseColor || null;
 
@@ -47,9 +58,30 @@ app.post("/api/order", (req, res) => {
 
   order.total = total;
 
-  orders.push(order);
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Sheet1!A1",
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[
+        order.id,
+        order.createdAt,
+        order.status,
+        order.name,
+        order.class,
+        order.phone,
+        order.email,
+        order.product,
+        order.color || "",
+        order.baseColor || "",
+        order.quality,
+        order.priority,
+        order.basePrice,
+        order.total
+      ]]
+    }
+  });
 
-  fs.writeFileSync(filePath, JSON.stringify(orders, null, 2));
 
   console.log("New order received:", order);
 
@@ -118,7 +150,7 @@ app.get("/orders1157", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
-app.get("/api/orders", (req, res) => {
+app.get("/api/orders", async (req, res) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Basic ")) {
@@ -138,13 +170,32 @@ app.get("/api/orders", (req, res) => {
     return res.status(401).send("Unauthorized");
   }
 
-  const filePath = path.join(__dirname, "orders.json");
-  const orders = fs.existsSync(filePath)
-    ? JSON.parse(fs.readFileSync(filePath, "utf-8"))
-    : [];
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Sheet1!A2:Z"
+  });
+
+  const rows = response.data.values || [];
+
+  const orders = rows.map(r => ({
+    id: r[0],
+    createdAt: r[1],
+    status: r[2],
+    name: r[3],
+    class: r[4],
+    phone: r[5],
+    email: r[6],
+    product: r[7],
+    color: r[8],
+    baseColor: r[9],
+    quality: r[10],
+    priority: r[11],
+    basePrice: r[12],
+    total: r[13]
+  }));
 
   res.json(orders);
-});
+
 
 app.delete("/api/order/:id", (req, res) => {
   const authHeader = req.headers.authorization;
