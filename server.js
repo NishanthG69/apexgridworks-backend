@@ -24,9 +24,6 @@ const auth = new google.auth.JWT(
   ["https://www.googleapis.com/auth/spreadsheets"]
 );
 
-auth.authorize();
-
-
 const sheets = google.sheets({ version: "v4", auth });
 
 const fs = require("fs");
