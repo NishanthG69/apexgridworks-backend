@@ -7,6 +7,10 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
+app.get("/ping", (req, res) => {
+  res.send("Server awake");
+});
+
 app.use(express.json());
 app.use(cors());
 
@@ -269,3 +273,4 @@ app.post("/api/order/status", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
