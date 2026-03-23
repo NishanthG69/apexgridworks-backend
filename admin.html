@@ -191,7 +191,7 @@ function renderOrders(data){
       <div class="order-id">ORDER #AGW-${String(o.id).slice(-5)}</div>
 
       <div class="product">
-        ${o.product}${o.color ? " — " + o.team : ""}
+        ${o.product}${o.team ? " — " + o.team : ""}
       </div>
       ${o.baseColor ? `<div class="meta">Base: ${o.baseColor}</div>` : ""}
       <div class="badges">
