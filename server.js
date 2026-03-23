@@ -56,6 +56,11 @@ const Order = mongoose.model("Order", OrderSchema);
 
 
 app.post("/api/order", async (req, res) => {
+  if (req.body.warmup === true) {
+    console.log("Warmup ping received.");
+    return res.json({ success: true, warmup: true });
+  }
+  
   try {
     const order = req.body;
     order.baseColor ||= null;
