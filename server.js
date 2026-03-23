@@ -40,7 +40,7 @@ const OrderSchema = new mongoose.Schema({
   product: String,
   team: String,
   baseColor: String,
-
+  color: String,
   basePrice: Number,
   quality: String,
   priority: Boolean,
