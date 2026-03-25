@@ -89,13 +89,56 @@ app.post("/api/order", async (req, res) => {
     sendMail(
       order.email,
       `Apex Grid Works — Order ${shortId(order.id)} received`,
-      `...`
+      `
+      <p>Hi ${order.name},</p>
+    
+      <p>Your order <b>${shortId(order.id)}</b> has been received.</p>
+    
+      <p>
+        <b>Product:</b> ${order.product}${order.team ? " — " + order.team : ""}<br>
+        ${order.baseColor ? `<b>Base:</b> ${order.baseColor}<br>` : ""}
+        ${order.quality === "PREMIUM" || order.priority
+          ? `<b>Extras:</b>
+            ${order.quality === "PREMIUM" ? "Premium Finish" : ""}
+            ${order.quality === "PREMIUM" && order.priority ? ", " : ""}
+            ${order.priority ? "Quick Delivery" : ""}
+            <br>`
+          : ""}
+        <b>Total:</b> ₹${order.total}
+      </p>
+    
+      <p>We’ll contact you soon for delivery.</p>
+    
+      <p>— Apex Grid Works</p>
+      `
     );
 
     sendMail(
       process.env.ADMIN_EMAIL,
       `🆕 New Order — ${shortId(order.id)}`,
-      `...`
+      `
+      <p><b>New Order Received</b></p>
+    
+      <p>
+        Name: ${order.name}<br>
+        Class: ${order.class} (${order.board})<br>
+        Phone: ${order.phone}<br>
+        Email: ${order.email}
+      </p>
+    
+      <p>
+        Product: ${order.product}${order.team ? " — " + order.team : ""}<br>
+        ${order.baseColor ? `Base: ${order.baseColor}<br>` : ""}
+        ${order.quality === "PREMIUM" || order.priority
+          ? `Extras:
+            ${order.quality === "PREMIUM" ? "Premium" : ""}
+            ${order.quality === "PREMIUM" && order.priority ? ", " : ""}
+            ${order.priority ? "Priority" : ""}
+            <br>`
+          : ""}
+        Total: ₹${order.total}
+      </p>
+      `
     );
 
     res.json({ success: true });
